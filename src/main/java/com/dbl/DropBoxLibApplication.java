@@ -1,4 +1,4 @@
-package com.dropBox.dropBoxLib;
+package com.dbl;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

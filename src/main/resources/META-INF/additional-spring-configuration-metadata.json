@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "application.dropbox-config",
+    "type": "java.lang.String",
+    "description": "A description for 'application.dropbox-config'"
+  },
+  {
+    "name": "application.access-token",
+    "type": "java.lang.String",
+    "description": "A description for 'application.access-token'"
+  },
+  {
+    "name": "application.drop-box-root-path",
+    "type": "java.lang.String",
+    "description": "A description for 'application.drop-box-root-path'"
+  },
+  {
+    "name": "application.long-pull",
+    "type": "java.lang.String",
+    "description": "A description for 'application.long-pull'"
+  }
+]}

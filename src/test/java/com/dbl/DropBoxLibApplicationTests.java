@@ -1,4 +1,4 @@
-package com.dropBox.dropBoxLib;
+package com.dbl;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
