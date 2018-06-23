@@ -88,36 +88,39 @@ public class DropBoxService {
 	 * @throws DbxException
 	 * @throws IOException
 	 */
-	public void upload(File inputFile, String path) throws DbxException, IOException {
-		logger.debug("going to upload file" + inputFile.getName() + " path:" + path);
-		try (InputStream in = new FileInputStream(inputFile)) {
-			FileMetadata metadata = client.files().uploadBuilder(path + inputFile.getName()).uploadAndFinish(in);
+	public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
+		if (fullPath == null || fullPath.isEmpty() || inputFile == null) {
+			logger.error("no file to upload - full path or input stream is empty/null");
 		}
+
+		logger.debug("going to upload file " + fullPath);
+		FileMetadata metadata = client.files().uploadBuilder(fullPath).uploadAndFinish(inputFile);
+		return metadata;
 	}
 
-	public List<String> allFiles(){
+	public List<String> allFiles() {
 		List<String> res = new ArrayList<>();
 		try {
 			String syncFiles = syncFiles(res);
 			logger.debug(syncFiles);
-			
+
 		} catch (Exception e) {
-			logger.error("Error on retrive all files",e);
+			logger.error("Error on retrive all files", e);
 		}
 		return res;
 	}
-	
+
 	public String syncFiles(List<String> files) throws ListFolderErrorException, DbxException {
 
 		ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder("");
 		ListFolderResult result = listFolderBuilder.withRecursive(true).start();
-			
+
 		while (true) {
 
 			if (result != null) {
-				for ( Metadata entry : result.getEntries()) {
-					if (entry instanceof FileMetadata){
-						logger.info("Added file: "+entry.getPathLower());
+				for (Metadata entry : result.getEntries()) {
+					if (entry instanceof FileMetadata) {
+						logger.info("Added file: " + entry.getPathLower());
 					}
 				}
 
@@ -129,11 +132,12 @@ public class DropBoxService {
 				try {
 					result = client.files().listFolderContinue(result.getCursor());
 				} catch (DbxException e) {
-					logger.info ("Couldn't get listFolderContinue");
+					logger.info("Couldn't get listFolderContinue");
 				}
 			}
 		}
 	}
+
 	/**
 	 * This method will rename files on DropBox
 	 * 
