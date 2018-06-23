@@ -121,6 +121,7 @@ public class DropBoxService {
 				for (Metadata entry : result.getEntries()) {
 					if (entry instanceof FileMetadata) {
 						logger.info("Added file: " + entry.getPathLower());
+						files.add(entry.getPathLower());
 					}
 				}
 
