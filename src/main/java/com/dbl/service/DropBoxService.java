@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import com.dbl.config.ApplicationProperties;
+import com.dbl.config.DropBoxLibProperties;
 import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
@@ -31,17 +31,17 @@ import com.dropbox.core.v2.files.Metadata;
  *
  */
 @Service
-@EnableConfigurationProperties(ApplicationProperties.class)
+@EnableConfigurationProperties(DropBoxLibProperties.class)
 public class DropBoxService {
 	private final Logger logger = LoggerFactory.getLogger(DropBoxService.class);
 
 	private DbxClientV2 client;
-	private final ApplicationProperties appProperties;
+	private final DropBoxLibProperties appProperties;
 	private final DropBoxUtils dropBoxUtils;
 
 	private ListFolderResult result;
 
-	public DropBoxService(ApplicationProperties boxProperties, DropBoxUtils dropBoxUtils) {
+	public DropBoxService(DropBoxLibProperties boxProperties, DropBoxUtils dropBoxUtils) {
 		this.appProperties = boxProperties;
 		this.dropBoxUtils = dropBoxUtils;
 	}

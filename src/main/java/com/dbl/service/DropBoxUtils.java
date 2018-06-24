@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.dbl.config.ApplicationProperties;
+import com.dbl.config.DropBoxLibProperties;
 import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxHost;
 import com.dropbox.core.DbxRequestConfig;
@@ -42,7 +42,7 @@ public class DropBoxUtils {
 	 * @param appProperties
 	 * @return
 	 */
-	public DbxAuthInfo getAuth(ApplicationProperties appProperties) {
+	public DbxAuthInfo getAuth(DropBoxLibProperties appProperties) {
 		
 		DbxHost host = DbxHost.DEFAULT;
 		String accessToken = appProperties.getAccessToken();
@@ -50,13 +50,13 @@ public class DropBoxUtils {
 		return authInfo;
 	}
 
-	public Config getDefaultConfig(ApplicationProperties appProperties) {
+	public Config getDefaultConfig(DropBoxLibProperties appProperties) {
 		//TODO: create another getConfig method with config construction
 		StandardHttpRequestor.Config config = Config.DEFAULT_INSTANCE;
 		return config;
 	}
 	
-	public Config getLongPoolConfig(ApplicationProperties appProperties) {
+	public Config getLongPoolConfig(DropBoxLibProperties appProperties) {
 		StandardHttpRequestor.Config longpollConfig = getDefaultConfig(appProperties).copy()
 				// read timeout should be greater than our longpoll timeout and include enough
 				// buffer

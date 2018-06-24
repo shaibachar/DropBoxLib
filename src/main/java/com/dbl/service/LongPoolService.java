@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
-import com.dbl.config.ApplicationProperties;
+import com.dbl.config.DropBoxLibProperties;
 import com.dbl.domain.ChangeType;
 import com.dbl.domain.message.FileMessage;
 import com.dropbox.core.DbxApiException;
@@ -28,18 +28,18 @@ import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 
 @Service
-@EnableConfigurationProperties(ApplicationProperties.class)
+@EnableConfigurationProperties(DropBoxLibProperties.class)
 public class LongPoolService {
 	private final Logger logger = LoggerFactory.getLogger(LongPoolService.class);
 
 	private final DropBoxUtils dropBoxUtils;
-	private final ApplicationProperties appProperties;
+	private final DropBoxLibProperties appProperties;
 
 	private long longpollTimeoutSecs = TimeUnit.MINUTES.toSeconds(2);
 
 	private List<FileEventListener> eventListeners;
 
-	public LongPoolService(DropBoxUtils dropBoxUtils, ApplicationProperties appProperties) {
+	public LongPoolService(DropBoxUtils dropBoxUtils, DropBoxLibProperties appProperties) {
 		this.dropBoxUtils = dropBoxUtils;
 		this.appProperties = appProperties;
 		eventListeners = new ArrayList<>();

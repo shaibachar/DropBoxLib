@@ -3,8 +3,8 @@ package com.dbl.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 
-@ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
-public class ApplicationProperties {
+@ConfigurationProperties(prefix = "dropboxlib", ignoreUnknownFields = false)
+public class DropBoxLibProperties {
 
 	private String dropboxConfig;
 	private String accessToken;
