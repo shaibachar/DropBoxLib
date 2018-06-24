@@ -2,11 +2,14 @@ package com.dbl.domain.message;
 
 import java.util.Arrays;
 
+import com.dbl.domain.ChangeType;
+import com.dropbox.core.v2.files.Metadata;
+
 public class FileMessage {
 
 	private byte[] file;
-	private String messageType;
-	private String messageDetails;
+	private ChangeType messageType;
+	private Metadata messageDetails;
 
 	public FileMessage() {
 
@@ -20,19 +23,19 @@ public class FileMessage {
 		this.file = file;
 	}
 
-	public String getMessageType() {
+	public ChangeType getMessageType() {
 		return messageType;
 	}
 
-	public void setMessageType(String messageType) {
+	public void setMessageType(ChangeType messageType) {
 		this.messageType = messageType;
 	}
 
-	public String getMessageDetails() {
+	public Metadata getMessageDetails() {
 		return messageDetails;
 	}
 
-	public void setMessageDetails(String messageDetails) {
+	public void setMessageDetails(Metadata messageDetails) {
 		this.messageDetails = messageDetails;
 	}
 

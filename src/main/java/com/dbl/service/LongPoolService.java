@@ -182,7 +182,7 @@ public class LongPoolService {
 					throw new IllegalStateException("Unrecognized metadata type: " + metadata.getClass());
 				}
 
-				FileMessage fileMessage = getFileMessage(type, metadata.getPathLower());
+				FileMessage fileMessage = getFileMessage(type, metadata);
 				// channel.send(MessageBuilder.withPayload(fileMessage).build());
 				int updateListeners = updateListeners(fileMessage);
 				logger.debug(updateListeners + " where updated");
@@ -199,9 +199,9 @@ public class LongPoolService {
 		return cursor;
 	}
 
-	private FileMessage getFileMessage(ChangeType type, String details) {
+	private FileMessage getFileMessage(ChangeType type, Metadata details) {
 		FileMessage fileMessage = new FileMessage();
-		fileMessage.setMessageType(type.toString());
+		fileMessage.setMessageType(type);
 		fileMessage.setMessageDetails(details);
 		return fileMessage;
 	}
