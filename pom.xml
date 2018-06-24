@@ -71,10 +71,10 @@
 				<goal>install-file</goal>
 			      </goals>
 			      <configuration>
-				<file>target/dropboxlib-0.0.2-SNAPSHOT.jar</file>
-				<groupId>dropboxlib</groupId>
-				<artifactId>dropboxlib</artifactId>
-				<version>0.0.2-SNAPSHOT</version>
+				<file>target/${project.artifactId}-${project.version}.jar</file>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>${project.artifactId}</artifactId>
+				<version>${project.version}</version>
 				<packaging>jar</packaging>
 				<generatePom>true</generatePom>
 			      </configuration>
