@@ -1,8 +1,6 @@
 package com.dbl.service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -98,10 +96,18 @@ public class DropBoxService {
 		return metadata;
 	}
 
-	public List<String> allFiles() {
-		List<String> res = new ArrayList<>();
+	/**
+	 * This method will return all files under folder path recursive if the path is
+	 * empty all files in all folders will return.
+	 * 
+	 * @param path
+	 * @param recursive
+	 * @return
+	 */
+	public List<FileMetadata> allFiles(String path, boolean recursive) {
+		List<FileMetadata> res = new ArrayList<>();
 		try {
-			String syncFiles = syncFiles(res);
+			String syncFiles = syncFiles(res, path, recursive);
 			logger.debug(syncFiles);
 
 		} catch (Exception e) {
@@ -110,10 +116,10 @@ public class DropBoxService {
 		return res;
 	}
 
-	public String syncFiles(List<String> files) throws ListFolderErrorException, DbxException {
+	public String syncFiles(List<FileMetadata> files, String path, boolean recursive) throws ListFolderErrorException, DbxException {
 
-		ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder("");
-		ListFolderResult result = listFolderBuilder.withRecursive(true).start();
+		ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
+		ListFolderResult result = listFolderBuilder.withRecursive(recursive).start();
 
 		while (true) {
 
@@ -121,7 +127,7 @@ public class DropBoxService {
 				for (Metadata entry : result.getEntries()) {
 					if (entry instanceof FileMetadata) {
 						logger.info("Added file: " + entry.getPathLower());
-						files.add(entry.getPathLower());
+						files.add((FileMetadata) entry);
 					}
 				}
 
@@ -138,7 +144,7 @@ public class DropBoxService {
 			}
 		}
 	}
-
+	
 	/**
 	 * This method will rename files on DropBox
 	 * 
