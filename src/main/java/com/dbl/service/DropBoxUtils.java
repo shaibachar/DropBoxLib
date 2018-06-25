@@ -1,5 +1,8 @@
 package com.dbl.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -8,11 +11,14 @@ import org.springframework.stereotype.Component;
 
 import com.dbl.config.DropBoxLibProperties;
 import com.dropbox.core.DbxAuthInfo;
+import com.dropbox.core.DbxDownloader;
+import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxHost;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.http.StandardHttpRequestor;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
 
 @Component
 public class DropBoxUtils {
@@ -67,5 +73,32 @@ public class DropBoxUtils {
 				.withReadTimeout(5, TimeUnit.MINUTES).build();
 		
 		return longpollConfig;
+	}
+	
+	public byte[] download(String filePath,DbxClientV2 client) throws DbxException, IOException {
+		logger.debug("Going to download file" + filePath);
+		byte[] out = null;
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try {
+			DbxDownloader<FileMetadata> download = client.files().download(filePath);
+			FileMetadata download2 = download.download(outputStream);
+			logger.info("Metadata: " + download2.toString());
+			out = outputStream.toByteArray();
+
+		} finally {
+			outputStream.close();
+		}
+
+		return out;
+	}
+	
+	public FileMetadata upload(InputStream inputFile, String fullPath,DbxClientV2 client) throws DbxException, IOException {
+		if (fullPath == null || fullPath.isEmpty() || inputFile == null) {
+			logger.error("no file to upload - full path or input stream is empty/null");
+		}
+
+		logger.debug("going to upload file " + fullPath);
+		FileMetadata metadata = client.files().uploadBuilder(fullPath).uploadAndFinish(inputFile);
+		return metadata;
 	}
 }

@@ -62,20 +62,8 @@ public class DropBoxService {
 	 * @throws IOException
 	 */
 	public byte[] download(String filePath) throws DbxException, IOException {
-		logger.debug("Going to download file" + filePath);
-		byte[] out = null;
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		try {
-			DbxDownloader<FileMetadata> download = client.files().download(filePath);
-			FileMetadata download2 = download.download(outputStream);
-			logger.info("Metadata: " + download2.toString());
-			out = outputStream.toByteArray();
-
-		} finally {
-			outputStream.close();
-		}
-
-		return out;
+		byte[] download = dropBoxUtils.download(filePath, client);
+		return download;
 	}
 
 	/**
@@ -87,13 +75,8 @@ public class DropBoxService {
 	 * @throws IOException
 	 */
 	public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
-		if (fullPath == null || fullPath.isEmpty() || inputFile == null) {
-			logger.error("no file to upload - full path or input stream is empty/null");
-		}
-
-		logger.debug("going to upload file " + fullPath);
-		FileMetadata metadata = client.files().uploadBuilder(fullPath).uploadAndFinish(inputFile);
-		return metadata;
+		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client);
+		return upload;
 	}
 
 	/**

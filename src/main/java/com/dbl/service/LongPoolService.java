@@ -1,5 +1,6 @@
 package com.dbl.service;
 
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,12 +125,14 @@ public class LongPoolService {
 			String message = ex.getUserMessage() != null ? ex.getUserMessage().getText() : ex.getMessage();
 			logger.error("Error making API call: " + message);
 		} catch (NetworkIOException ex) {
-			logger.error("Error making API call: " + ex.getMessage());
+			logger.error("Error making API call: ", ex);
 			if (ex.getCause() instanceof SocketTimeoutException) {
 				logger.error("Consider increasing socket read timeout or decreasing longpoll timeout.");
 			}
 		} catch (DbxException ex) {
-			logger.error("Error making API call: " + ex.getMessage());
+			logger.error("Error making API call: ", ex);
+		} catch (IOException e) {
+			logger.error("Error making API call: ", e);
 		}
 	}
 
@@ -159,8 +162,9 @@ public class LongPoolService {
 	 *            lastest cursor received since last set of changes
 	 *
 	 * @return latest cursor after changes
+	 * @throws IOException
 	 */
-	private String getChanges(DbxClientV2 client, String cursor) throws DbxApiException, DbxException {
+	private String getChanges(DbxClientV2 client, String cursor) throws DbxApiException, DbxException, IOException {
 
 		while (true) {
 			ListFolderResult result = client.files().listFolderContinue(cursor);
@@ -183,6 +187,8 @@ public class LongPoolService {
 				}
 
 				FileMessage fileMessage = getFileMessage(type, metadata);
+				updateFileMessage(client, fileMessage);
+
 				// channel.send(MessageBuilder.withPayload(fileMessage).build());
 				int updateListeners = updateListeners(fileMessage);
 				logger.debug(updateListeners + " where updated");
@@ -197,6 +203,15 @@ public class LongPoolService {
 		}
 
 		return cursor;
+	}
+
+	private void updateFileMessage(DbxClientV2 client, FileMessage fileMessage) throws DbxException, IOException {
+		if (fileMessage.getMessageType() == ChangeType.FILE) {
+			byte[] download = dropBoxUtils.download(fileMessage.getMessageDetails().getPathLower(), client);
+			fileMessage.setFile(download);
+		}else {
+			logger.debug("did not download file");
+		}
 	}
 
 	private FileMessage getFileMessage(ChangeType type, Metadata details) {
