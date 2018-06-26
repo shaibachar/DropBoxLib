@@ -3,3 +3,8 @@ dropboxlib:
   accessToken: 
   dropBoxRootPath: 
   longPull: true
+  
+management:
+  endpoint:
+    health:
+      show-details: always

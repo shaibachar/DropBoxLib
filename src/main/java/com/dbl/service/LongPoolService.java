@@ -2,6 +2,8 @@ package com.dbl.service;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -39,12 +41,20 @@ public class LongPoolService {
 	private long longpollTimeoutSecs = TimeUnit.MINUTES.toSeconds(2);
 
 	private List<FileEventListener> eventListeners;
-
+	private LocalDateTime lastChangeTime;
+	
 	public LongPoolService(DropBoxUtils dropBoxUtils, DropBoxLibProperties appProperties) {
 		this.dropBoxUtils = dropBoxUtils;
 		this.appProperties = appProperties;
 		eventListeners = new ArrayList<>();
+		lastChangeTime = LocalDateTime.now();
 	}
+
+	
+	public LocalDateTime getLastChangeTime() {
+		return lastChangeTime;
+	}
+
 
 	public void register(FileEventListener fileEventListener) {
 		if (eventListeners.isEmpty() || !eventListeners.contains(fileEventListener)) {
@@ -107,32 +117,34 @@ public class LongPoolService {
 					cursor = getChanges(dbxClient, cursor);
 				}
 
-				// we were asked to back off from our polling, wait the requested amount of
-				// seconds
-				// before issuing another longpoll request.
-				Long backoff = result.getBackoff();
-				if (backoff != null) {
+				Long wait = result.getBackoff();
+				if (wait != null) {
 					try {
-						System.out.printf("backing off for %d secs...\n", backoff.longValue());
-						Thread.sleep(TimeUnit.SECONDS.toMillis(backoff));
+						logger.debug("backing off for %d secs...\n", wait.longValue());
+						Thread.sleep(TimeUnit.SECONDS.toMillis(wait));
 					} catch (InterruptedException ex) {
 						logger.error("", ex);
 					}
 				}
+				lastChangeTime = LocalDateTime.now();
 			}
 		} catch (DbxApiException ex) {
 			// if a user message is available, try using that instead
 			String message = ex.getUserMessage() != null ? ex.getUserMessage().getText() : ex.getMessage();
 			logger.error("Error making API call: " + message);
+			lastChangeTime = LocalDateTime.now().minusYears(1);
 		} catch (NetworkIOException ex) {
 			logger.error("Error making API call: ", ex);
 			if (ex.getCause() instanceof SocketTimeoutException) {
 				logger.error("Consider increasing socket read timeout or decreasing longpoll timeout.");
 			}
+			lastChangeTime = LocalDateTime.now().minusYears(1);
 		} catch (DbxException ex) {
 			logger.error("Error making API call: ", ex);
+			lastChangeTime = LocalDateTime.now().minusYears(1);
 		} catch (IOException e) {
 			logger.error("Error making API call: ", e);
+			lastChangeTime = LocalDateTime.now().minusYears(1);
 		}
 	}
 
