@@ -18,7 +18,9 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.http.StandardHttpRequestor;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.DeleteResult;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.Metadata;
 
 @Component
 public class DropBoxUtils {
@@ -98,6 +100,13 @@ public class DropBoxUtils {
 		}
 
 		logger.debug("going to upload file " + fullPath);
+		try {
+			DeleteResult deleteV2 = client.files().deleteV2(fullPath);
+			Metadata metadata = deleteV2.getMetadata();
+			logger.debug(metadata.toStringMultiline());
+		} catch (Exception e) {
+			logger.debug("tried to delete before update");
+		}
 		FileMetadata metadata = client.files().uploadBuilder(fullPath).uploadAndFinish(inputFile);
 		return metadata;
 	}
