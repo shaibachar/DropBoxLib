@@ -23,6 +23,7 @@ public class DropBoxConnectionHealthIndicator implements HealthIndicator {
 		if (longPoolService.getLastChangeTime().isAfter(minusMinutes)) {
 			return Health.up().withDetail("connected", true).build();
 		}else {
+			longPoolService.connect();
 			return Health.down().withDetail("connected", false).build();
 		}
 	}
