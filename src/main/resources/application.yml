@@ -3,6 +3,7 @@ dropboxlib:
   accessToken: 
   dropBoxRootPath: 
   longPull: true
+  interestingFileFormat: .doc,.docx
   
 management:
   endpoint:
