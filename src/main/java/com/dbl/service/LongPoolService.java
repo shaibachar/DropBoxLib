@@ -42,7 +42,7 @@ public class LongPoolService {
 
 	private List<FileEventListener> eventListeners;
 	private LocalDateTime lastChangeTime;
-	
+
 	public LongPoolService(DropBoxUtils dropBoxUtils, DropBoxLibProperties appProperties) {
 		this.dropBoxUtils = dropBoxUtils;
 		this.appProperties = appProperties;
@@ -50,11 +50,9 @@ public class LongPoolService {
 		lastChangeTime = LocalDateTime.now();
 	}
 
-	
 	public LocalDateTime getLastChangeTime() {
 		return lastChangeTime;
 	}
-
 
 	public void register(FileEventListener fileEventListener) {
 		if (eventListeners.isEmpty() || !eventListeners.contains(fileEventListener)) {
@@ -218,11 +216,25 @@ public class LongPoolService {
 	}
 
 	private void updateFileMessage(DbxClientV2 client, FileMessage fileMessage) throws DbxException, IOException {
-		if (fileMessage.getMessageType() == ChangeType.FILE) {
+		if (fileMessage.getMessageType() == ChangeType.FILE && isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower())) {
 			byte[] download = dropBoxUtils.download(fileMessage.getMessageDetails().getPathLower(), client);
 			fileMessage.setFile(download);
-		}else {
+		} else {
 			logger.debug("did not download file");
+		}
+	}
+
+	private boolean isInterestingFileFormat(String pathLower) {
+		List<String> interestingFileFormat = appProperties.getInterestingFileFormat();
+		if (interestingFileFormat.size() == 0) {
+			return true;
+		} else {
+			for (String format : interestingFileFormat) {
+				if (pathLower.endsWith(format)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
