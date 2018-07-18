@@ -1,0 +1,11 @@
+dropboxlib:
+  dropboxConfig: 
+  accessToken: 
+  dropBoxRootPath: 
+  longPull: true
+  interestingFileFormat: .doc,.docx
+  
+management:
+  endpoint:
+    health:
+      show-details: always

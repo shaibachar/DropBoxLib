@@ -6,7 +6,7 @@
 
 	<groupId>dropboxlib</groupId>
 	<artifactId>dropboxlib</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>dropboxlib</name>
@@ -33,30 +33,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
+			<artifactId>spring-boot-autoconfigure-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -64,55 +49,28 @@
 	<build>
 		<plugins>
 			<plugin>
-			  <groupId>org.apache.maven.plugins</groupId>
-			  <artifactId>maven-install-plugin</artifactId>
-			  <version>2.4</version>
-			  <executions>
-			    <execution>
-			      <id>install1</id>
-			      <phase>package</phase>
-			      <goals>
-				<goal>install-file</goal>
-			      </goals>
-			      <configuration>
-				<file>target/${project.artifactId}-${project.version}.jar</file>
-				<groupId>${project.groupId}</groupId>
-				<artifactId>${project.artifactId}</artifactId>
-				<version>${project.version}</version>
-				<packaging>jar</packaging>
-				<generatePom>true</generatePom>
-			      </configuration>
-			    </execution>
-			  </executions>
-			</plugin>
-		</plugins>
-	</build>
-	<!-- build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.4</version>
 				<executions>
 					<execution>
-						<id>lib</id>
+						<id>install1</id>
 						<phase>package</phase>
 						<goals>
-							<goal>jar</goal>
+							<goal>install-file</goal>
 						</goals>
 						<configuration>
-							<classifier>lib</classifier>
-							<excludes>
-								<exclude>application.yml</exclude>
-							</excludes>
+							<file>target/${project.artifactId}-${project.version}.jar</file>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 		</plugins>
-	</build-->
-
+	</build>
 
 </project>
