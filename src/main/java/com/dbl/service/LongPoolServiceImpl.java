@@ -1,7 +1,6 @@
 package com.dbl.service;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,6 @@ import com.dbl.domain.message.FileMessage;
 import com.dropbox.core.DbxApiException;
 import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxException;
-import com.dropbox.core.NetworkIOException;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DeletedMetadata;
@@ -40,11 +38,18 @@ public class LongPoolServiceImpl implements LongPoolService {
 	private List<FileEventListener> eventListeners;
 	private LocalDateTime lastChangeTime;
 
+	private Thread keepConnectionThread;
+
 	public LongPoolServiceImpl(DropBoxLibProperties appProperties, DropBoxUtils dropBoxUtils) {
 		this.dropBoxUtils = dropBoxUtils;
 		this.appProperties = appProperties;
 		eventListeners = new ArrayList<>();
 		lastChangeTime = LocalDateTime.now();
+	}
+
+	@Override
+	public Boolean isHealth() {
+		return lastChangeTime.isAfter(LocalDateTime.now().minusMinutes(5));
 	}
 
 	/*
@@ -101,6 +106,33 @@ public class LongPoolServiceImpl implements LongPoolService {
 		return res;
 	}
 
+	private Boolean firstConnect = true;
+	@Override
+	public void keepConnection() {
+		keepConnectionThread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (appProperties.isLongPull()) {
+					if (!isHealth()||firstConnect) {
+						logger.error("reconnecting!!");
+						connect();
+						firstConnect = false;
+					}
+
+					try {
+						Thread.sleep(60000);
+					} catch (InterruptedException e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+
+			}
+		});
+
+		keepConnectionThread.start();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -119,19 +151,16 @@ public class LongPoolServiceImpl implements LongPoolService {
 		Config longpollConfig = dropBoxUtils.getLongPoolConfig(appProperties);
 		DbxAuthInfo auth = dropBoxUtils.getAuth(appProperties);
 		DbxClientV2 dbxClient = dropBoxUtils.createClient(auth, config, appProperties.getDropboxConfig());
-		DbxClientV2 dbxLongpollClient = dropBoxUtils.createClient(auth, longpollConfig,
-				appProperties.getDropboxConfig());
+		DbxClientV2 dbxLongpollClient = dropBoxUtils.createClient(auth, longpollConfig, appProperties.getDropboxConfig());
 
 		try {
 			// We only care about file changes, not existing files, so grab latest cursor
 			// for this path and then longpoll for changes.
 			String cursor = getLatestCursor(dbxClient, appProperties.getDropBoxRootPath());
 
-			// TODO: add condition to restart
 			while (appProperties.isLongPull()) {
 				// will block for longpollTimeoutSecs or until a change is made in the folder
-				ListFolderLongpollResult result = dbxLongpollClient.files().listFolderLongpoll(cursor,
-						longpollTimeoutSecs);
+				ListFolderLongpollResult result = dbxLongpollClient.files().listFolderLongpoll(cursor, longpollTimeoutSecs);
 
 				// we have changes, list them
 				// TODO: check what happends when the connection is lost - we might need to stop
@@ -151,22 +180,8 @@ public class LongPoolServiceImpl implements LongPoolService {
 				}
 				lastChangeTime = LocalDateTime.now();
 			}
-		} catch (DbxApiException ex) {
-			// if a user message is available, try using that instead
-			String message = ex.getUserMessage() != null ? ex.getUserMessage().getText() : ex.getMessage();
-			logger.error("Error making API call: " + message);
-			lastChangeTime = LocalDateTime.now().minusYears(1);
-		} catch (NetworkIOException ex) {
-			logger.error("Error making API call: ", ex);
-			if (ex.getCause() instanceof SocketTimeoutException) {
-				logger.error("Consider increasing socket read timeout or decreasing longpoll timeout.");
-			}
-			lastChangeTime = LocalDateTime.now().minusYears(1);
-		} catch (DbxException ex) {
-			logger.error("Error making API call: ", ex);
-			lastChangeTime = LocalDateTime.now().minusYears(1);
-		} catch (IOException e) {
-			logger.error("Error making API call: ", e);
+		} catch (Exception ex) {
+			logger.error("Error ", ex);
 			lastChangeTime = LocalDateTime.now().minusYears(1);
 		}
 	}
@@ -183,8 +198,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 	 * @return cursor for listing changes to the given Dropbox directory
 	 */
 	private String getLatestCursor(DbxClientV2 dbxClient, String path) throws DbxApiException, DbxException {
-		ListFolderGetLatestCursorResult result = dbxClient.files().listFolderGetLatestCursorBuilder(path)
-				.withIncludeDeleted(true).withIncludeMediaInfo(false).withRecursive(true).start();
+		ListFolderGetLatestCursorResult result = dbxClient.files().listFolderGetLatestCursorBuilder(path).withIncludeDeleted(true).withIncludeMediaInfo(false).withRecursive(true).start();
 		return result.getCursor();
 	}
 
@@ -243,8 +257,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 	}
 
 	private void updateFileMessage(DbxClientV2 client, FileMessage fileMessage) throws DbxException, IOException {
-		if (fileMessage.getMessageType() == ChangeType.FILE
-				&& isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower())) {
+		if (fileMessage.getMessageType() == ChangeType.FILE && isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower())) {
 			byte[] download = dropBoxUtils.download(fileMessage.getMessageDetails().getPathLower(), client);
 			fileMessage.setFile(download);
 		} else {

@@ -13,6 +13,7 @@ import com.dbl.service.DropBoxUtils;
 import com.dbl.service.DropBoxUtilsImpl;
 import com.dbl.service.LongPoolService;
 import com.dbl.service.LongPoolServiceImpl;
+import com.dbl.service.indicator.DropBoxConnectionHealthIndicator;
 
 @Configuration
 @EnableConfigurationProperties(DropBoxLibProperties.class)

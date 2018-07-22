@@ -31,7 +31,7 @@ public class StartupRunner implements CommandLineRunner {
 
 		log.info("Going to connect to dropBox and listen to changes");
 		longPoolService.register(fileEventListener);
-		longPoolService.connect();
+		longPoolService.keepConnection();
 	}
 
 }

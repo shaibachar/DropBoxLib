@@ -26,4 +26,8 @@ public interface LongPoolService {
 	 */
 	void connect();
 
+	Boolean isHealth();
+
+	void keepConnection();
+
 }

@@ -40,7 +40,9 @@ public class DropBoxServiceImpl implements DropBoxService {
 		this.dropBoxUtils = dropBoxUtils;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.dbl.service.DropBoxService#connect()
 	 */
 	@Override
@@ -50,7 +52,9 @@ public class DropBoxServiceImpl implements DropBoxService {
 		client = dropBoxUtils.createClient(auth, config, appProperties.getDropboxConfig());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.dbl.service.DropBoxService#download(java.lang.String)
 	 */
 	@Override
@@ -59,8 +63,11 @@ public class DropBoxServiceImpl implements DropBoxService {
 		return download;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxService#upload(java.io.InputStream, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxService#upload(java.io.InputStream,
+	 * java.lang.String)
 	 */
 	@Override
 	public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
@@ -68,7 +75,9 @@ public class DropBoxServiceImpl implements DropBoxService {
 		return upload;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.dbl.service.DropBoxService#allFiles(java.lang.String, boolean)
 	 */
 	@Override
@@ -84,8 +93,11 @@ public class DropBoxServiceImpl implements DropBoxService {
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxService#syncFiles(java.util.List, java.lang.String, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxService#syncFiles(java.util.List,
+	 * java.lang.String, boolean)
 	 */
 	@Override
 	public String syncFiles(List<FileMetadata> files, String path, boolean recursive) throws ListFolderErrorException, DbxException {
@@ -93,32 +105,34 @@ public class DropBoxServiceImpl implements DropBoxService {
 		ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 		ListFolderResult result = listFolderBuilder.withRecursive(recursive).start();
 
-		while (true) {
+		while (result != null) {
 
-			if (result != null) {
-				for (Metadata entry : result.getEntries()) {
-					if (entry instanceof FileMetadata) {
-						logger.info("Added file: " + entry.getPathLower());
-						files.add((FileMetadata) entry);
-					}
-				}
-
-				if (!result.getHasMore()) {
-					logger.info("GET LATEST CURSOR");
-					return result.getCursor();
-				}
-
-				try {
-					result = client.files().listFolderContinue(result.getCursor());
-				} catch (DbxException e) {
-					logger.info("Couldn't get listFolderContinue");
+			for (Metadata entry : result.getEntries()) {
+				if (entry instanceof FileMetadata) {
+					logger.info("Added file: " + entry.getPathLower());
+					files.add((FileMetadata) entry);
 				}
 			}
+
+			if (!result.getHasMore()) {
+				logger.info("GET LATEST CURSOR");
+				return result.getCursor();
+			}
+
+			try {
+				result = client.files().listFolderContinue(result.getCursor());
+			} catch (DbxException e) {
+				logger.info("Couldn't get listFolderContinue");
+			}
 		}
+		return result.getCursor();
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxService#rename(java.lang.String, java.lang.String)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxService#rename(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void rename(String fromPath, String toPath) throws DbxException {
@@ -127,7 +141,9 @@ public class DropBoxServiceImpl implements DropBoxService {
 		logger.debug(metadata.toStringMultiline());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.dbl.service.DropBoxService#getResult()
 	 */
 	@Override
@@ -135,8 +151,11 @@ public class DropBoxServiceImpl implements DropBoxService {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxService#setResult(com.dropbox.core.v2.files.ListFolderResult)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxService#setResult(com.dropbox.core.v2.files.
+	 * ListFolderResult)
 	 */
 	@Override
 	public void setResult(ListFolderResult result) {
