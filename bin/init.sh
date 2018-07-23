@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=/home/shai/workspace/DropBoxLib/target/dropboxlib-0.0.2-SNAPSHOT.jar -DgroupId=dropboxlib -DartifactId=dropboxlib -Dversion=0.0.2-SNAPSHOT -Dpackaging=jar -DgeneratePom=true

@@ -1,0 +1,13 @@
+dropboxlib:
+  dropboxConfig: shshsh
+  accessToken: ZkF9ifq5xqAAAAAAAAAABg6bWtvPX0VwDWf8sYlb0XOY4Uew-ubJI5xwOyictms9
+  dropBoxRootPath: 
+  longPull: true
+  interestingFileFormat: .doc,.docx
+  
+logging:
+  level:
+    root: INFO
+    org.springframework.web: ERROR
+    com.dbl: DEBUG
+    test.test: DEBUG
