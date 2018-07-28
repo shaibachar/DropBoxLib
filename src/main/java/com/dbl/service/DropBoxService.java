@@ -6,11 +6,13 @@ import java.util.List;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 
 public interface DropBoxService {
 
+	
 	/**
 	 * This method will login to DropBox
 	 */
@@ -46,7 +48,14 @@ public interface DropBoxService {
 	 */
 	List<FileMetadata> allFiles(String path, boolean recursive);
 
-	String syncFiles(List<FileMetadata> files, String path, boolean recursive)
+	/**
+	 * This method will return all the folders names in the root folder path 
+	 * @param rootfolderPath
+	 * @return
+	 */
+	List<FolderMetadata> allFolders(String rootfolderPath,boolean recursive);
+	
+	String syncFiles(List<FolderMetadata> folders,List<FileMetadata> files, String path, boolean recursive)
 			throws ListFolderErrorException, DbxException;
 
 	/**

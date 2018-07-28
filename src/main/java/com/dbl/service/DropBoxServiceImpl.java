@@ -15,6 +15,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderBuilder;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
@@ -84,11 +85,24 @@ public class DropBoxServiceImpl implements DropBoxService {
 	public List<FileMetadata> allFiles(String path, boolean recursive) {
 		List<FileMetadata> res = new ArrayList<>();
 		try {
-			String syncFiles = syncFiles(res, path, recursive);
+			String syncFiles = syncFiles(null, res, path, recursive);
 			logger.debug(syncFiles);
 
 		} catch (Exception e) {
 			logger.error("Error on retrive all files", e);
+		}
+		return res;
+	}
+
+	@Override
+	public List<FolderMetadata> allFolders(String path, boolean recursive) {
+		List<FolderMetadata> res = new ArrayList<>();
+		try {
+			String syncFiles = syncFiles(res, null, path, recursive);
+			logger.debug(syncFiles);
+
+		} catch (Exception e) {
+			logger.error("Error on retrive all folders", e);
 		}
 		return res;
 	}
@@ -100,17 +114,23 @@ public class DropBoxServiceImpl implements DropBoxService {
 	 * java.lang.String, boolean)
 	 */
 	@Override
-	public String syncFiles(List<FileMetadata> files, String path, boolean recursive) throws ListFolderErrorException, DbxException {
+	public String syncFiles(List<FolderMetadata> folders, List<FileMetadata> files, String path, boolean recursive) throws ListFolderErrorException, DbxException {
 
 		ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 		ListFolderResult result = listFolderBuilder.withRecursive(recursive).start();
-
 		while (result != null) {
 
 			for (Metadata entry : result.getEntries()) {
 				if (entry instanceof FileMetadata) {
-					logger.info("Added file: " + entry.getPathLower());
-					files.add((FileMetadata) entry);
+					if (files != null) {
+						logger.debug("Added file: " + entry.getPathLower());
+						files.add((FileMetadata) entry);
+					}
+				} else if (entry instanceof FolderMetadata) {
+					if (folders != null) {
+						logger.debug("Added file: " + entry.getPathLower());
+						folders.add((FolderMetadata) entry);
+					}
 				}
 			}
 
@@ -161,4 +181,5 @@ public class DropBoxServiceImpl implements DropBoxService {
 	public void setResult(ListFolderResult result) {
 		this.result = result;
 	}
+
 }
