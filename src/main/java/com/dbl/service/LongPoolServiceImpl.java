@@ -268,7 +268,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 	}
 
 	private boolean isInterestingFileFormat(String pathLower, FileEventListener fileEventListener) {
-		List<String> fileEventListenerInterestingFileFormat = fileEventListener.getInterestingFileFormat()
+		List<String> fileEventListenerInterestingFileFormat = fileEventListener.getInterestingFileFormat();
 		List<String> interestingFileFormat = fileEventListenerInterestingFileFormat==null?appProperties.getInterestingFileFormat():fileEventListenerInterestingFileFormat;
 		
 		if (interestingFileFormat.size() == 0) {

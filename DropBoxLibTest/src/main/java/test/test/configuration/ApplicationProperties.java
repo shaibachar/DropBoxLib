@@ -1,5 +1,7 @@
 package test.test.configuration;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -15,6 +17,7 @@ public class ApplicationProperties {
 	private String accessToken;
 	private String dropBoxRootPath;
 	private boolean longPull;
+	
 	public String getDropboxConfig() {
 		return dropboxConfig;
 	}
