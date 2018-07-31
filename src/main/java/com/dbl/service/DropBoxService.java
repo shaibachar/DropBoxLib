@@ -3,6 +3,7 @@ package com.dbl.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -18,6 +19,14 @@ public interface DropBoxService {
 	 */
 	void connect();
 
+	/**
+	 * This method will download all files in dropBox folder 
+	 * @param folderPath
+	 * @return
+	 * @throws IOException 
+	 * @throws DbxException 
+	 */
+	Map<String,byte[]> downloadAll(String folderPath) throws DbxException, IOException;
 	/**
 	 * This method will download files from DropBox
 	 * 

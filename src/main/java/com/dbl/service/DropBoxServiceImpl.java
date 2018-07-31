@@ -3,7 +3,9 @@ package com.dbl.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,19 @@ public class DropBoxServiceImpl implements DropBoxService {
 		Config config = dropBoxUtils.getDefaultConfig(appProperties);
 		DbxAuthInfo auth = dropBoxUtils.getAuth(appProperties);
 		client = dropBoxUtils.createClient(auth, config, appProperties.getDropboxConfig());
+	}
+
+	@Override
+	public Map<String, byte[]> downloadAll(String folderPath) throws DbxException, IOException {
+		Map<String, byte[]> res = new HashMap<>();
+		if (folderPath == null || folderPath.isEmpty()) {
+			return res;
+		}
+		List<FileMetadata> allFiles = allFiles(folderPath, true);
+		for (FileMetadata fileMetadata : allFiles) {
+			res.put(fileMetadata.getName(), download(fileMetadata.getPathLower()));
+		}
+		return res;
 	}
 
 	/*
