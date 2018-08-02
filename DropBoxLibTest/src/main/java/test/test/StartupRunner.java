@@ -4,15 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.dbl.service.DropBoxService;
 import com.dbl.service.FileEventListener;
 import com.dbl.service.LongPoolService;
 
-@Profile("!test")
 @Component
+@ConditionalOnProperty(prefix = "job.autorun", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class StartupRunner implements CommandLineRunner {
 	private static final Logger log = LoggerFactory.getLogger(StartupRunner.class);
 

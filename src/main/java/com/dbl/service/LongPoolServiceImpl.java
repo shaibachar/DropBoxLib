@@ -99,8 +99,10 @@ public class LongPoolServiceImpl implements LongPoolService {
 
 		List<FileEventListener> eventListeners2 = getEventListeners();
 		for (FileEventListener fileEventListener : eventListeners2) {
-			fileEventListener.fileChanged(fileMessage);
-			res++;
+			if (isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower(),fileEventListener)){
+				fileEventListener.fileChanged(fileMessage);
+				res++;
+			}
 		}
 
 		return res;
@@ -257,7 +259,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 	}
 
 	private void updateFileMessage(DbxClientV2 client, FileMessage fileMessage) throws DbxException, IOException {
-		if (fileMessage.getMessageType() == ChangeType.FILE && isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower())) {
+		if (fileMessage.getMessageType() == ChangeType.FILE) {
 			byte[] download = dropBoxUtils.download(fileMessage.getMessageDetails().getPathLower(), client);
 			fileMessage.setFile(download);
 		} else {
@@ -265,8 +267,10 @@ public class LongPoolServiceImpl implements LongPoolService {
 		}
 	}
 
-	private boolean isInterestingFileFormat(String pathLower) {
-		List<String> interestingFileFormat = appProperties.getInterestingFileFormat();
+	private boolean isInterestingFileFormat(String pathLower, FileEventListener fileEventListener) {
+		List<String> fileEventListenerInterestingFileFormat = fileEventListener.getInterestingFileFormat();
+		List<String> interestingFileFormat = fileEventListenerInterestingFileFormat==null?appProperties.getInterestingFileFormat():fileEventListenerInterestingFileFormat;
+		
 		if (interestingFileFormat.size() == 0) {
 			return true;
 		} else {
