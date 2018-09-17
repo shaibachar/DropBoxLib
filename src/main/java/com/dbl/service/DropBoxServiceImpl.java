@@ -63,7 +63,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 		}
 		List<FileMetadata> allFiles = allFiles(folderPath, true);
 		for (FileMetadata fileMetadata : allFiles) {
-			res.put(fileMetadata.getName(), download(fileMetadata.getPathLower()));
+			res.put(fileMetadata.getPathLower(), download(fileMetadata.getPathLower()));
 		}
 		return res;
 	}
