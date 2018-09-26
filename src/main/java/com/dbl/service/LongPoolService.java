@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.dbl.domain.message.FileMessage;
+import com.dropbox.core.DbxApiException;
+import com.dropbox.core.DbxException;
 
 public interface LongPoolService {
-
-	LocalDateTime getLastChangeTime();
 
 	void register(FileEventListener fileEventListener);
 
@@ -23,11 +23,12 @@ public interface LongPoolService {
 
 	/**
 	 * This method will login to DropBox
+	 * @throws DbxException 
+	 * @throws DbxApiException 
 	 */
-	void connect();
+	void connect() throws DbxApiException, DbxException;
 
-	Boolean isHealth();
+	boolean isHealth();
 
-	void keepConnection();
 
 }

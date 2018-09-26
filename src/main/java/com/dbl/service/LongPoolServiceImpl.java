@@ -1,7 +1,6 @@
 package com.dbl.service;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,30 +35,13 @@ public class LongPoolServiceImpl implements LongPoolService {
 	private long longpollTimeoutSecs = TimeUnit.MINUTES.toSeconds(2);
 
 	private List<FileEventListener> eventListeners;
-	private LocalDateTime lastChangeTime;
 
-	private Thread keepConnectionThread;
+	private boolean health;
 
 	public LongPoolServiceImpl(DropBoxLibProperties appProperties, DropBoxUtils dropBoxUtils) {
 		this.dropBoxUtils = dropBoxUtils;
 		this.appProperties = appProperties;
 		eventListeners = new ArrayList<>();
-		lastChangeTime = LocalDateTime.now();
-	}
-
-	@Override
-	public Boolean isHealth() {
-		return lastChangeTime.isAfter(LocalDateTime.now().minusMinutes(5));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dbl.service.LongPoolService#getLastChangeTime()
-	 */
-	@Override
-	public LocalDateTime getLastChangeTime() {
-		return lastChangeTime;
 	}
 
 	/*
@@ -99,7 +81,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 
 		List<FileEventListener> eventListeners2 = getEventListeners();
 		for (FileEventListener fileEventListener : eventListeners2) {
-			if (isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower(),fileEventListener)){
+			if (isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower(), fileEventListener)) {
 				fileEventListener.fileChanged(fileMessage);
 				res++;
 			}
@@ -108,40 +90,13 @@ public class LongPoolServiceImpl implements LongPoolService {
 		return res;
 	}
 
-	private Boolean firstConnect = true;
-	@Override
-	public void keepConnection() {
-		keepConnectionThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while (appProperties.isLongPull()) {
-					if (!isHealth()||firstConnect) {
-						logger.error("reconnecting!!");
-						connect();
-						firstConnect = false;
-					}
-
-					try {
-						Thread.sleep(60000);
-					} catch (InterruptedException e) {
-						logger.error(e.getMessage(), e);
-					}
-				}
-
-			}
-		});
-
-		keepConnectionThread.start();
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.dbl.service.LongPoolService#connect()
 	 */
 	@Override
-	public void connect() {
+	public void connect() throws DbxApiException, DbxException {
 		// need 2 Dropbox clients for making calls:
 		//
 		// (1) One for longpoll requests, with its read timeout set longer than our
@@ -155,12 +110,12 @@ public class LongPoolServiceImpl implements LongPoolService {
 		DbxClientV2 dbxClient = dropBoxUtils.createClient(auth, config, appProperties.getDropboxConfig());
 		DbxClientV2 dbxLongpollClient = dropBoxUtils.createClient(auth, longpollConfig, appProperties.getDropboxConfig());
 
-		try {
-			// We only care about file changes, not existing files, so grab latest cursor
-			// for this path and then longpoll for changes.
-			String cursor = getLatestCursor(dbxClient, appProperties.getDropBoxRootPath());
+		// We only care about file changes, not existing files, so grab latest cursor
+		// for this path and then longpoll for changes.
+		String cursor = getLatestCursor(dbxClient, appProperties.getDropBoxRootPath());
 
-			while (appProperties.isLongPull()) {
+		while (appProperties.isLongPull()) {
+			try {
 				// will block for longpollTimeoutSecs or until a change is made in the folder
 				ListFolderLongpollResult result = dbxLongpollClient.files().listFolderLongpoll(cursor, longpollTimeoutSecs);
 
@@ -180,11 +135,22 @@ public class LongPoolServiceImpl implements LongPoolService {
 						logger.error("", ex);
 					}
 				}
-				lastChangeTime = LocalDateTime.now();
+				health = true;
+			} catch (Exception ex) {
+				logger.error("Error on longPool service connection loop", ex);
+				config = dropBoxUtils.getDefaultConfig(appProperties);
+				longpollConfig = dropBoxUtils.getLongPoolConfig(appProperties);
+				auth = dropBoxUtils.getAuth(appProperties);
+				dbxClient = dropBoxUtils.createClient(auth, config, appProperties.getDropboxConfig());
+				dbxLongpollClient = dropBoxUtils.createClient(auth, longpollConfig, appProperties.getDropboxConfig());
+				try {
+					cursor = getLatestCursor(dbxClient, appProperties.getDropBoxRootPath());
+				} catch (Exception e) {
+					logger.error("Error on getting last cursor", e);
+				} 
+				health = false;
 			}
-		} catch (Exception ex) {
-			logger.error("Error ", ex);
-			lastChangeTime = LocalDateTime.now().minusYears(1);
+
 		}
 	}
 
@@ -269,8 +235,8 @@ public class LongPoolServiceImpl implements LongPoolService {
 
 	private boolean isInterestingFileFormat(String pathLower, FileEventListener fileEventListener) {
 		List<String> fileEventListenerInterestingFileFormat = fileEventListener.getInterestingFileFormat();
-		List<String> interestingFileFormat = fileEventListenerInterestingFileFormat==null?appProperties.getInterestingFileFormat():fileEventListenerInterestingFileFormat;
-		
+		List<String> interestingFileFormat = fileEventListenerInterestingFileFormat == null ? appProperties.getInterestingFileFormat() : fileEventListenerInterestingFileFormat;
+
 		if (interestingFileFormat.size() == 0) {
 			return true;
 		} else {
@@ -288,6 +254,11 @@ public class LongPoolServiceImpl implements LongPoolService {
 		fileMessage.setMessageType(type);
 		fileMessage.setMessageDetails(details);
 		return fileMessage;
+	}
+
+	@Override
+	public boolean isHealth() {
+		return health;
 	}
 
 }
