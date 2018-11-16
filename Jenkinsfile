@@ -32,7 +32,7 @@ node {
         } catch(err) {
             throw err
         } finally {
-            junit '**/target/surefire-reports/TEST-*.xml'
+//            junit '**/target/surefire-reports/TEST-*.xml'
         }
     }
 
