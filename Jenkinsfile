@@ -39,7 +39,6 @@ node {
     stage('packaging') {
         sh "./mvnw verify -Pprod -DskipTests"
 	sh "./mvnw install -Pprod -DskipTests"
-        archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
     }
 
 }
