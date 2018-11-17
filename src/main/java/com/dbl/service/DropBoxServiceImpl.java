@@ -63,7 +63,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 		}
 		List<FileMetadata> allFiles = allFiles(folderPath, true);
 		for (FileMetadata fileMetadata : allFiles) {
-			res.put(fileMetadata.getName(), download(fileMetadata.getPathLower()));
+			res.put(fileMetadata.getPathLower(), download(fileMetadata.getPathLower()));
 		}
 		return res;
 	}
@@ -131,8 +131,13 @@ public class DropBoxServiceImpl implements DropBoxService {
 	@Override
 	public String syncFiles(List<FolderMetadata> folders, List<FileMetadata> files, String path, boolean recursive) throws ListFolderErrorException, DbxException {
 
-		ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
-		ListFolderResult result = listFolderBuilder.withRecursive(recursive).start();
+		ListFolderResult result = null;
+		try {
+			ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
+			result = listFolderBuilder.withRecursive(recursive).start();
+		} catch (NullPointerException e) {
+			logger.error(e.getMessage());
+		}
 		while (result != null) {
 
 			for (Metadata entry : result.getEntries()) {
@@ -159,6 +164,10 @@ public class DropBoxServiceImpl implements DropBoxService {
 			} catch (DbxException e) {
 				logger.info("Couldn't get listFolderContinue");
 			}
+		}
+		//this shit will get me sorry one day
+		if (result == null) {
+			return "";
 		}
 		return result.getCursor();
 	}
