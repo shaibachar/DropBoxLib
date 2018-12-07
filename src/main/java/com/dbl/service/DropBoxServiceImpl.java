@@ -2,6 +2,7 @@ package com.dbl.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -136,7 +137,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 			ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 			result = listFolderBuilder.withRecursive(recursive).start();
 		} catch (NullPointerException e) {
-			logger.error(e.getMessage());
+			logger.error(MessageFormat.format("Error for sync files on path:{0}", path),e.getMessage());
 		}
 		while (result != null) {
 
