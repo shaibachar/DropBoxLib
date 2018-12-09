@@ -80,4 +80,15 @@ public interface DropBoxService {
 
 	void setResult(ListFolderResult result);
 
+	/**
+	 * 
+	 * @param inputFile
+	 * @param fullPath
+	 * @param override
+	 * @return
+	 * @throws DbxException
+	 * @throws IOException
+	 */
+	FileMetadata upload(InputStream inputFile, String fullPath, boolean override) throws DbxException, IOException;
+
 }
