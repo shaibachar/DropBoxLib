@@ -20,46 +20,61 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DeleteResult;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.UploadBuilder;
+import com.dropbox.core.v2.files.UploadUploader;
+import com.dropbox.core.v2.files.WriteMode;
 
 public class DropBoxUtilsImpl implements DropBoxUtils {
 
 	private final Logger logger = LoggerFactory.getLogger(DropBoxUtilsImpl.class);
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxUtils#createClient(com.dropbox.core.DbxAuthInfo, com.dropbox.core.http.StandardHttpRequestor.Config, java.lang.String)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxUtils#createClient(com.dropbox.core.DbxAuthInfo,
+	 * com.dropbox.core.http.StandardHttpRequestor.Config, java.lang.String)
 	 */
 	@Override
 	public DbxClientV2 createClient(DbxAuthInfo auth, StandardHttpRequestor.Config config, String clientUserAgentId) {
 		StandardHttpRequestor requestor = new StandardHttpRequestor(config);
-		DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder(clientUserAgentId).withHttpRequestor(requestor)
-				.build();
+		DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder(clientUserAgentId).withHttpRequestor(requestor).build();
 
 		return new DbxClientV2(requestConfig, auth.getAccessToken(), auth.getHost());
 	}
 
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxUtils#getAuth(com.dbl.config.DropBoxLibProperties)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.dbl.service.DropBoxUtils#getAuth(com.dbl.config.DropBoxLibProperties)
 	 */
 	@Override
 	public DbxAuthInfo getAuth(DropBoxLibProperties appProperties) {
-		
+
 		DbxHost host = DbxHost.DEFAULT;
 		String accessToken = appProperties.getAccessToken();
 		DbxAuthInfo authInfo = new DbxAuthInfo(accessToken, host);
 		return authInfo;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxUtils#getDefaultConfig(com.dbl.config.DropBoxLibProperties)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxUtils#getDefaultConfig(com.dbl.config.
+	 * DropBoxLibProperties)
 	 */
 	@Override
 	public Config getDefaultConfig(DropBoxLibProperties appProperties) {
-		//TODO: create another getConfig method with config construction
+		// TODO: create another getConfig method with config construction
 		StandardHttpRequestor.Config config = Config.DEFAULT_INSTANCE;
 		return config;
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxUtils#getLongPoolConfig(com.dbl.config.DropBoxLibProperties)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxUtils#getLongPoolConfig(com.dbl.config.
+	 * DropBoxLibProperties)
 	 */
 	@Override
 	public Config getLongPoolConfig(DropBoxLibProperties appProperties) {
@@ -71,15 +86,18 @@ public class DropBoxUtilsImpl implements DropBoxUtils {
 				// to our longpoll timeout to avoid the stampeding herd problem. See
 				// DbxFiles.listFolderLongpoll(String, long) documentation for details.
 				.withReadTimeout(5, TimeUnit.MINUTES).build();
-		
+
 		return longpollConfig;
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxUtils#download(java.lang.String, com.dropbox.core.v2.DbxClientV2)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxUtils#download(java.lang.String,
+	 * com.dropbox.core.v2.DbxClientV2)
 	 */
 	@Override
-	public byte[] download(String filePath,DbxClientV2 client) throws DbxException, IOException {
+	public byte[] download(String filePath, DbxClientV2 client) throws DbxException, IOException {
 		logger.debug("Going to download file" + filePath);
 		byte[] out = null;
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -95,25 +113,36 @@ public class DropBoxUtilsImpl implements DropBoxUtils {
 
 		return out;
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.dbl.service.DropBoxUtils#upload(java.io.InputStream, java.lang.String, com.dropbox.core.v2.DbxClientV2)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.dbl.service.DropBoxUtils#upload(java.io.InputStream,
+	 * java.lang.String, com.dropbox.core.v2.DbxClientV2)
 	 */
 	@Override
-	public FileMetadata upload(InputStream inputFile, String fullPath,DbxClientV2 client) throws DbxException, IOException {
+	public FileMetadata upload(InputStream inputFile, String fullPath, DbxClientV2 client) throws DbxException, IOException {
+		return upload(inputFile, fullPath, client, true);
+	}
+
+	@Override
+	public FileMetadata upload(InputStream inputFile, String fullPath, DbxClientV2 client, boolean override) throws DbxException, IOException {
 		if (fullPath == null || fullPath.isEmpty() || inputFile == null) {
 			logger.error("no file to upload - full path or input stream is empty/null");
 		}
 
 		logger.debug("going to upload file " + fullPath);
-		try {
-			DeleteResult deleteV2 = client.files().deleteV2(fullPath);
-			Metadata metadata = deleteV2.getMetadata();
-			logger.debug(metadata.toStringMultiline());
-		} catch (Exception e) {
-			logger.debug("tried to delete before update");
-		}
-		FileMetadata metadata = client.files().uploadBuilder(fullPath).uploadAndFinish(inputFile);
+
+		//FileMetadata metadata = client.files().uploadBuilder(fullPath).uploadAndFinish(inputFile);
+
+		final WriteMode writeMode = override ? WriteMode.OVERWRITE : WriteMode.ADD;
+		final Boolean autoRename = override ? Boolean.FALSE : Boolean.TRUE;
+
+		UploadBuilder uploadBuilder = client.files().uploadBuilder(fullPath);
+		uploadBuilder.withMode(writeMode);
+		uploadBuilder.withAutorename(autoRename);
+		FileMetadata metadata = uploadBuilder.uploadAndFinish(inputFile);
+
 		return metadata;
 	}
 }

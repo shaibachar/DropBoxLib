@@ -41,4 +41,6 @@ public interface DropBoxUtils {
 
 	FileMetadata upload(InputStream inputFile, String fullPath, DbxClientV2 client) throws DbxException, IOException;
 
+	FileMetadata upload(InputStream inputFile, String fullPath, DbxClientV2 client, boolean override) throws DbxException, IOException;
+
 }

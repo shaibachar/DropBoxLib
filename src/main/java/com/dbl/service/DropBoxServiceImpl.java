@@ -2,6 +2,7 @@ package com.dbl.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,11 +87,17 @@ public class DropBoxServiceImpl implements DropBoxService {
 	 * java.lang.String)
 	 */
 	@Override
-	public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
-		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client);
+	public FileMetadata upload(InputStream inputFile, String fullPath,boolean override) throws DbxException, IOException {
+		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client,override);
 		return upload;
 	}
 
+	@Override
+	public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
+		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client,true);
+		return upload;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -135,8 +142,8 @@ public class DropBoxServiceImpl implements DropBoxService {
 		try {
 			ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 			result = listFolderBuilder.withRecursive(recursive).start();
-		} catch (NullPointerException e) {
-			logger.error(e.getMessage());
+		} catch (Exception e) {
+			logger.error(MessageFormat.format("Error for sync files on path:{0}", path),e.getMessage());
 		}
 		while (result != null) {
 
