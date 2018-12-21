@@ -10,6 +10,8 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.SearchErrorException;
+import com.dropbox.core.v2.files.SearchResult;
 
 public interface DropBoxService {
 
@@ -90,5 +92,15 @@ public interface DropBoxService {
 	 * @throws IOException
 	 */
 	FileMetadata upload(InputStream inputFile, String fullPath, boolean override) throws DbxException, IOException;
+
+	/**
+	 * This method will search drop box
+	 * @param path
+	 * @param query
+	 * @return
+	 * @throws DbxException 
+	 * @throws SearchErrorException 
+	 */
+	SearchResult search(String path, String query) throws SearchErrorException, DbxException;
 
 }

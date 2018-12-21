@@ -23,6 +23,8 @@ import com.dropbox.core.v2.files.ListFolderBuilder;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.SearchErrorException;
+import com.dropbox.core.v2.files.SearchResult;
 
 /**
  * 
@@ -211,6 +213,12 @@ public class DropBoxServiceImpl implements DropBoxService {
 	@Override
 	public void setResult(ListFolderResult result) {
 		this.result = result;
+	}
+
+	@Override
+	public SearchResult search(String path,String query) throws SearchErrorException, DbxException {
+		SearchResult search = client.files().search(path, query);
+		return search;
 	}
 
 }
