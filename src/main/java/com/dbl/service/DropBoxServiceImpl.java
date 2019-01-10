@@ -143,7 +143,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 			ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 			result = listFolderBuilder.withRecursive(recursive).start();
 		} catch (Exception e) {
-			logger.error(MessageFormat.format("Error for sync files on path:{0}", path),e.getMessage());
+			logger.error(MessageFormat.format("Error for sync files on path:{0} {1}", path,e.getMessage()),e);
 		}
 		while (result != null) {
 
