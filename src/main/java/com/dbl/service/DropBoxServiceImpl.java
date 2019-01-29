@@ -17,11 +17,15 @@ import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.DbxRawClientV2;
+import com.dropbox.core.v2.files.DbxUserFilesRequests;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderBuilder;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.ListRevisionsErrorException;
+import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.SearchErrorException;
 import com.dropbox.core.v2.files.SearchResult;
@@ -59,6 +63,13 @@ public class DropBoxServiceImpl implements DropBoxService {
 	}
 
 	@Override
+	public ListRevisionsResult getRevisions(String path) throws ListRevisionsErrorException, DbxException {
+		DbxUserFilesRequests files = client.files();
+		ListRevisionsResult listRevisions = files.listRevisions(path);
+		return listRevisions;
+	}
+	
+	@Override
 	public Map<String, byte[]> downloadAll(String folderPath) throws DbxException, IOException {
 		Map<String, byte[]> res = new HashMap<>();
 		if (folderPath == null || folderPath.isEmpty()) {
@@ -89,17 +100,18 @@ public class DropBoxServiceImpl implements DropBoxService {
 	 * java.lang.String)
 	 */
 	@Override
-	public FileMetadata upload(InputStream inputFile, String fullPath,boolean override) throws DbxException, IOException {
-		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client,override);
+	public FileMetadata upload(InputStream inputFile, String fullPath, boolean override)
+			throws DbxException, IOException {
+		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client, override);
 		return upload;
 	}
 
 	@Override
 	public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
-		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client,true);
+		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client, true);
 		return upload;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -138,14 +150,15 @@ public class DropBoxServiceImpl implements DropBoxService {
 	 * java.lang.String, boolean)
 	 */
 	@Override
-	public String syncFiles(List<FolderMetadata> folders, List<FileMetadata> files, String path, boolean recursive) throws ListFolderErrorException, DbxException {
+	public String syncFiles(List<FolderMetadata> folders, List<FileMetadata> files, String path, boolean recursive)
+			throws ListFolderErrorException, DbxException {
 
 		ListFolderResult result = null;
 		try {
 			ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 			result = listFolderBuilder.withRecursive(recursive).start();
 		} catch (Exception e) {
-			logger.error(MessageFormat.format("Error for sync files on path:{0} {1}", path,e.getMessage()),e);
+			logger.error(MessageFormat.format("Error for sync files on path:{0} {1}", path, e.getMessage()), e);
 		}
 		while (result != null) {
 
@@ -174,11 +187,8 @@ public class DropBoxServiceImpl implements DropBoxService {
 				logger.info("Couldn't get listFolderContinue");
 			}
 		}
-		//this shit will get me sorry one day
-		if (result == null) {
-			return "";
-		}
-		return result.getCursor();
+
+		return "";
 	}
 
 	/*
@@ -216,7 +226,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 	}
 
 	@Override
-	public SearchResult search(String path,String query) throws SearchErrorException, DbxException {
+	public SearchResult search(String path, String query) throws SearchErrorException, DbxException {
 		SearchResult search = client.files().search(path, query);
 		return search;
 	}

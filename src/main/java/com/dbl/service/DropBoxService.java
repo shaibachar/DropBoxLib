@@ -10,6 +10,8 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.ListRevisionsErrorException;
+import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.SearchErrorException;
 import com.dropbox.core.v2.files.SearchResult;
 
@@ -102,5 +104,14 @@ public interface DropBoxService {
 	 * @throws SearchErrorException 
 	 */
 	SearchResult search(String path, String query) throws SearchErrorException, DbxException;
+
+	/**
+	 * This method will retrieve all file revisions
+	 * @param path
+	 * @return
+	 * @throws ListRevisionsErrorException
+	 * @throws DbxException
+	 */
+	ListRevisionsResult getRevisions(String path) throws ListRevisionsErrorException, DbxException;
 
 }
