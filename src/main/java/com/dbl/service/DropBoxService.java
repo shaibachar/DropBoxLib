@@ -114,4 +114,13 @@ public interface DropBoxService {
 	 */
 	ListRevisionsResult getRevisions(String path) throws ListRevisionsErrorException, DbxException;
 
+	/**
+	 * This method will get all files of the file types
+	 * @param folderPath
+	 * @param b
+	 * @param fileTypes
+	 * @return
+	 */
+	List<FileMetadata> allFiles(String folderPath, boolean b, List<String> fileTypes);
+
 }

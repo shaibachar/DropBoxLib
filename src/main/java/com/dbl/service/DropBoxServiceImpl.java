@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,6 @@ import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.DbxRawClientV2;
 import com.dropbox.core.v2.files.DbxUserFilesRequests;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
@@ -68,7 +68,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 		ListRevisionsResult listRevisions = files.listRevisions(path);
 		return listRevisions;
 	}
-	
+
 	@Override
 	public Map<String, byte[]> downloadAll(String folderPath) throws DbxException, IOException {
 		Map<String, byte[]> res = new HashMap<>();
@@ -127,6 +127,24 @@ public class DropBoxServiceImpl implements DropBoxService {
 		} catch (Exception e) {
 			logger.error("Error on retrive all files", e);
 		}
+		return res;
+	}
+
+	@Override
+	public List<FileMetadata> allFiles(String folderPath, boolean recursive, List<String> fileTypes) {
+		List<FileMetadata> res = new ArrayList<>();
+		List<FileMetadata> allFiles = allFiles(folderPath, recursive);
+
+		for (FileMetadata fileMetadata : allFiles) {
+			String pathLower = fileMetadata.getPathLower();
+			for (String types : fileTypes) {
+				if(pathLower.contains(types)) {
+					res.add(fileMetadata);
+					break;
+				}
+			}
+		}
+		
 		return res;
 	}
 
