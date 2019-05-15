@@ -1,7 +1,6 @@
 package com.dbl.service;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -67,6 +67,18 @@ public class DropBoxServiceImpl implements DropBoxService {
 		DbxUserFilesRequests files = client.files();
 		ListRevisionsResult listRevisions = files.listRevisions(path);
 		return listRevisions;
+	}
+
+	@Override
+	public Map<String, byte[]> downloadAllZip(String folderPath) throws DbxException, IOException {
+		Map<String, byte[]> res = new HashMap<>();
+		if (folderPath == null || folderPath.isEmpty()) {
+			return res;
+		}
+
+		Map<String, byte[]> stringMap = dropBoxUtils.downloadZip(folderPath, client);
+
+		return stringMap;
 	}
 
 	@Override

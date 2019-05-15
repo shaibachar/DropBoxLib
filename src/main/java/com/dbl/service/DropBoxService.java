@@ -23,6 +23,8 @@ public interface DropBoxService {
 	 */
 	void connect();
 
+	Map<String, byte[]> downloadAllZip(String folderPath) throws DbxException, IOException;
+
 	/**
 	 * This method will download all files in dropBox folder 
 	 * @param folderPath
