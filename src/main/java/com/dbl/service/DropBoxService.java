@@ -125,4 +125,5 @@ public interface DropBoxService {
 	 */
 	List<FileMetadata> allFiles(String folderPath, boolean b, List<String> fileTypes);
 
+    Boolean checkPath(String path);
 }

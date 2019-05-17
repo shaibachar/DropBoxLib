@@ -261,4 +261,15 @@ public class DropBoxServiceImpl implements DropBoxService {
 		return search;
 	}
 
+	@Override
+	public Boolean checkPath(String path) {
+		try {
+			Metadata metadata = client.files().getMetadata(path);
+			return metadata!=null;
+		} catch (DbxException e) {
+			return false;
+		}
+	}
+
+
 }
