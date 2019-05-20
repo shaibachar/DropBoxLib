@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -270,6 +271,11 @@ public class DropBoxServiceImpl implements DropBoxService {
 			return false;
 		}
 	}
+
+    @Override
+    public void delete(@NotNull String oldFileName) throws DbxException {
+        client.files().deleteV2(oldFileName);
+    }
 
 
 }
