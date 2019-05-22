@@ -118,9 +118,12 @@ public class DropBoxUtilsImpl implements DropBoxUtils {
     public Map<String, byte[]> downloadZip(String filePath, DbxClientV2 client) throws DbxException, IOException {
         logger.debug("Going to download folder" + filePath);
         Map<String, byte[]> out = new HashMap<>();
+        DbxDownloader<DownloadZipResult> downloadZipResultDbxDownloader = null;
+        ZipInputStream zis = null;
+
         try {
-            DbxDownloader<DownloadZipResult> downloadZipResultDbxDownloader = client.files().downloadZip(filePath);
-            ZipInputStream zis = new ZipInputStream(downloadZipResultDbxDownloader.getInputStream());
+            downloadZipResultDbxDownloader = client.files().downloadZip(filePath);
+            zis = new ZipInputStream(downloadZipResultDbxDownloader.getInputStream());
             ZipEntry zipEntry = zis.getNextEntry();
             byte[] buffer = new byte[1024];
             while (zipEntry != null) {
@@ -129,13 +132,18 @@ public class DropBoxUtilsImpl implements DropBoxUtils {
                 while ((len = zis.read(buffer)) > 0) {
                     baos.write(buffer, 0, len);
                 }
-                out.put(zipEntry.getName(),baos.toByteArray());
+                out.put(zipEntry.getName(), baos.toByteArray());
                 baos.close();
                 zipEntry = zis.getNextEntry();
             }
 
         } finally {
-
+            if (downloadZipResultDbxDownloader != null) {
+                downloadZipResultDbxDownloader.close();
+            }
+            if (zis != null) {
+                zis.close();
+            }
         }
 
         return out;
