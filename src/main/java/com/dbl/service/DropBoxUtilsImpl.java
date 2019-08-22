@@ -1,6 +1,7 @@
 package com.dbl.service;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -113,6 +114,7 @@ public class DropBoxUtilsImpl implements DropBoxUtils {
         return out;
     }
 
+    private final static Long MILLS_IN_DAY = 86400000L;
 
     @Override
     public Map<String, byte[]> downloadZip(String filePath, DbxClientV2 client) throws DbxException, IOException {
@@ -124,6 +126,7 @@ public class DropBoxUtilsImpl implements DropBoxUtils {
         try {
             downloadZipResultDbxDownloader = client.files().downloadZip(filePath);
             zis = new ZipInputStream(downloadZipResultDbxDownloader.getInputStream());
+
             ZipEntry zipEntry = zis.getNextEntry();
             byte[] buffer = new byte[1024];
             while (zipEntry != null) {
@@ -134,9 +137,12 @@ public class DropBoxUtilsImpl implements DropBoxUtils {
                 }
                 out.put(zipEntry.getName(), baos.toByteArray());
                 baos.close();
+                logger.info("unzip:"+zipEntry.getName());
                 zipEntry = zis.getNextEntry();
             }
 
+        } catch (java.util.zip.ZipException e) {
+            logger.error("could not unzip due to :",e);
         } finally {
             if (downloadZipResultDbxDownloader != null) {
                 downloadZipResultDbxDownloader.close();
