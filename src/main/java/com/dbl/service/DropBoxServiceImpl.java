@@ -1,5 +1,15 @@
 package com.dbl.service;
 
+import com.dbl.config.DropBoxLibProperties;
+import com.dropbox.core.DbxAuthInfo;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.http.StandardHttpRequestor.Config;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -7,22 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
-import com.dbl.config.DropBoxLibProperties;
-import com.dropbox.core.DbxAuthInfo;
-import com.dropbox.core.DbxException;
-import com.dropbox.core.http.StandardHttpRequestor.Config;
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.ListFolderBuilder;
-import com.dropbox.core.v2.files.ListFolderErrorException;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
 
 /**
  * 
@@ -140,7 +134,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 
 		ListFolderResult result = null;
 		try {
-			ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
+			DbxUserListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 			result = listFolderBuilder.withRecursive(recursive).start();
 		} catch (Exception e) {
 			logger.error(MessageFormat.format("Error for sync files on path:{0} {1}", path,e.getMessage()),e);
