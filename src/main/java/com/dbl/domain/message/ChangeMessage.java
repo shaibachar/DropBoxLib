@@ -5,13 +5,13 @@ import java.util.Arrays;
 import com.dbl.domain.ChangeType;
 import com.dropbox.core.v2.files.Metadata;
 
-public class FileMessage {
+public class ChangeMessage {
 
 	private byte[] file;
 	private ChangeType messageType;
 	private Metadata messageDetails;
 
-	public FileMessage() {
+	public ChangeMessage() {
 
 	}
 

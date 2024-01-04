@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.dbl.domain.message.ChangeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import com.dbl.config.DropBoxLibProperties;
 import com.dbl.domain.ChangeType;
-import com.dbl.domain.message.FileMessage;
 import com.dropbox.core.DbxApiException;
 import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxException;
@@ -76,13 +76,13 @@ public class LongPoolServiceImpl implements LongPoolService {
 	 * FileMessage)
 	 */
 	@Override
-	public int updateListeners(FileMessage fileMessage) {
+	public int updateListeners(ChangeMessage changeMessage) {
 		int res = 0;
 
 		List<FileEventListener> eventListeners2 = getEventListeners();
 		for (FileEventListener fileEventListener : eventListeners2) {
-			if (isInterestingFileFormat(fileMessage.getMessageDetails().getPathLower(), fileEventListener)) {
-				fileEventListener.fileChanged(fileMessage);
+			if (isInterestingFileFormat(changeMessage.getMessageDetails().getPathLower(), fileEventListener)) {
+				fileEventListener.fileChanged(changeMessage);
 				res++;
 			}
 		}
@@ -190,13 +190,11 @@ public class LongPoolServiceImpl implements LongPoolService {
 			for (Metadata metadata : result.getEntries()) {
 				ChangeType type;
 				String details;
-				if (metadata instanceof FileMetadata) {
-					FileMetadata fileMetadata = (FileMetadata) metadata;
-					type = ChangeType.FILE;
+				if (metadata instanceof FileMetadata fileMetadata) {
+                    type = ChangeType.FILE;
 					details = "(rev=" + fileMetadata.getRev() + ")";
-				} else if (metadata instanceof FolderMetadata) {
-					FolderMetadata folderMetadata = (FolderMetadata) metadata;
-					type = ChangeType.FOLDER;
+				} else if (metadata instanceof FolderMetadata folderMetadata) {
+                    type = ChangeType.FOLDER;
 					details = folderMetadata.getSharingInfo() != null ? "(shared)" : "";
 				} else if (metadata instanceof DeletedMetadata) {
 					type = ChangeType.DELETE;
@@ -205,11 +203,11 @@ public class LongPoolServiceImpl implements LongPoolService {
 					throw new IllegalStateException("Unrecognized metadata type: " + metadata.getClass());
 				}
 
-				FileMessage fileMessage = getFileMessage(type, metadata);
-				updateFileMessage(client, fileMessage);
+				ChangeMessage changeMessage = getFileMessage(type, metadata);
+//				updateFileMessage(client, changeMessage);
 
-				// channel.send(MessageBuilder.withPayload(fileMessage).build());
-				int updateListeners = updateListeners(fileMessage);
+				// channel.send(MessageBuilder.withPayload(changeMessage).build());
+				int updateListeners = updateListeners(changeMessage);
 				logger.debug(updateListeners + " where updated");
 				logger.debug("type:" + type + " details:" + details + " meta:" + metadata.getPathLower());
 			}
@@ -224,7 +222,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 		return cursor;
 	}
 
-	private void updateFileMessage(DbxClientV2 client, FileMessage fileMessage) throws DbxException, IOException {
+	private void updateFileMessage(DbxClientV2 client, ChangeMessage fileMessage) throws DbxException, IOException {
 		if (fileMessage.getMessageType() == ChangeType.FILE) {
 			byte[] download = dropBoxUtils.download(fileMessage.getMessageDetails().getPathLower(), client);
 			fileMessage.setFile(download);
@@ -249,11 +247,11 @@ public class LongPoolServiceImpl implements LongPoolService {
 		}
 	}
 
-	private FileMessage getFileMessage(ChangeType type, Metadata details) {
-		FileMessage fileMessage = new FileMessage();
-		fileMessage.setMessageType(type);
-		fileMessage.setMessageDetails(details);
-		return fileMessage;
+	private ChangeMessage getFileMessage(ChangeType type, Metadata details) {
+		ChangeMessage changeMessage = new ChangeMessage();
+		changeMessage.setMessageType(type);
+		changeMessage.setMessageDetails(details);
+		return changeMessage;
 	}
 
 	@Override
