@@ -34,7 +34,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 
     private long longpollTimeoutSecs = TimeUnit.MINUTES.toSeconds(2);
 
-    private List<FileEventListener> eventListeners;
+    private List<ChangeEventListener> eventListeners;
 
     private boolean health;
 
@@ -51,9 +51,9 @@ public class LongPoolServiceImpl implements LongPoolService {
      * com.dbl.service.LongPoolService#register(com.dbl.service.FileEventListener)
      */
     @Override
-    public void register(FileEventListener fileEventListener) {
-        if (eventListeners.isEmpty() || !eventListeners.contains(fileEventListener)) {
-            eventListeners.add(fileEventListener);
+    public void register(ChangeEventListener changeEventListener) {
+        if (eventListeners.isEmpty() || !eventListeners.contains(changeEventListener)) {
+            eventListeners.add(changeEventListener);
         } else {
             logger.error("Check why we are registering again the same listener");
         }
@@ -65,7 +65,7 @@ public class LongPoolServiceImpl implements LongPoolService {
      * @see com.dbl.service.LongPoolService#getEventListeners()
      */
     @Override
-    public List<FileEventListener> getEventListeners() {
+    public List<ChangeEventListener> getEventListeners() {
         return eventListeners;
     }
 
@@ -79,8 +79,8 @@ public class LongPoolServiceImpl implements LongPoolService {
     public int updateListeners(ChangeMessage changeMessage) {
         int res = 0;
 
-        List<FileEventListener> eventListeners2 = getEventListeners();
-        for (FileEventListener changeEventListener : eventListeners2) {
+        List<ChangeEventListener> eventListeners2 = getEventListeners();
+        for (ChangeEventListener changeEventListener : eventListeners2) {
 //			if (isInterestingFileFormat(changeMessage.getMessageDetails().getPathLower(), changeEventListener)) {
             changeEventListener.change(changeMessage);
             res++;
@@ -225,8 +225,8 @@ public class LongPoolServiceImpl implements LongPoolService {
         }
     }
 
-    private boolean isInterestingFileFormat(String pathLower, FileEventListener fileEventListener) {
-        List<String> fileEventListenerInterestingFileFormat = fileEventListener.getInterestingFileFormat();
+    private boolean isInterestingFileFormat(String pathLower, ChangeEventListener changeEventListener) {
+        List<String> fileEventListenerInterestingFileFormat = changeEventListener.getInterestingFileFormat();
         List<String> interestingFileFormat = fileEventListenerInterestingFileFormat == null ? appProperties.getInterestingFileFormat() : fileEventListenerInterestingFileFormat;
 
         if (interestingFileFormat.size() == 0) {

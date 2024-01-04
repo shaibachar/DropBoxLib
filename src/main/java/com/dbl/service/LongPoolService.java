@@ -8,9 +8,9 @@ import com.dropbox.core.DbxException;
 
 public interface LongPoolService {
 
-	void register(FileEventListener fileEventListener);
+	void register(ChangeEventListener changeEventListener);
 
-	List<FileEventListener> getEventListeners();
+	List<ChangeEventListener> getEventListeners();
 
 	/**
 	 * This method will call observers

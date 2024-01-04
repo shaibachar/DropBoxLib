@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.dbl.domain.message.ChangeMessage;
 
-public interface FileEventListener {
+public interface ChangeEventListener {
 
 	public List<String> getInterestingFileFormat();
 	public void change(ChangeMessage fileMessage);
