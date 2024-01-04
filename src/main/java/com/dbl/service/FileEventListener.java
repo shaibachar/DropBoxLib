@@ -7,6 +7,6 @@ import com.dbl.domain.message.ChangeMessage;
 public interface FileEventListener {
 
 	public List<String> getInterestingFileFormat();
-	public void fileChanged(ChangeMessage fileMessage);
+	public void change(ChangeMessage fileMessage);
 	
 }
