@@ -174,7 +174,7 @@ public class LongPoolServiceImpl implements LongPoolService {
 	 * Prints changes made to a folder in Dropbox since the given cursor was
 	 * retrieved.
 	 *
-	 * @param dbxClient
+	 * @param client
 	 *            Dropbox client to use for fetching folder changes
 	 * @param cursor
 	 *            lastest cursor received since last set of changes
