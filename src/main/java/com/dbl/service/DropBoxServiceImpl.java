@@ -1,35 +1,23 @@
 package com.dbl.service;
 
-import java.io.*;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.FileUtils;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
 import com.dbl.config.DropBoxLibProperties;
 import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.DbxUserFilesRequests;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.ListFolderBuilder;
-import com.dropbox.core.v2.files.ListFolderErrorException;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.ListRevisionsErrorException;
-import com.dropbox.core.v2.files.ListRevisionsResult;
-import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.files.SearchErrorException;
-import com.dropbox.core.v2.files.SearchResult;
+import com.dropbox.core.v2.files.*;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -113,18 +101,17 @@ public class DropBoxServiceImpl implements DropBoxService {
 	 * java.lang.String)
 	 */
 	@Override
-	public FileMetadata upload(InputStream inputFile, String fullPath, boolean override)
-			throws DbxException, IOException {
-		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client, override);
+	public FileMetadata upload(InputStream inputFile, String fullPath,boolean override) throws DbxException, IOException {
+		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client,override);
 		return upload;
 	}
 
 	@Override
 	public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
-		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client, true);
+		FileMetadata upload = dropBoxUtils.upload(inputFile, fullPath, client,true);
 		return upload;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -157,7 +144,7 @@ public class DropBoxServiceImpl implements DropBoxService {
 				}
 			}
 		}
-		
+
 		return res;
 	}
 
@@ -181,15 +168,14 @@ public class DropBoxServiceImpl implements DropBoxService {
 	 * java.lang.String, boolean)
 	 */
 	@Override
-	public String syncFiles(List<FolderMetadata> folders, List<FileMetadata> files, String path, boolean recursive)
-			throws ListFolderErrorException, DbxException {
+	public String syncFiles(List<FolderMetadata> folders, List<FileMetadata> files, String path, boolean recursive) throws ListFolderErrorException, DbxException {
 
 		ListFolderResult result = null;
 		try {
-			ListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
+			DbxUserListFolderBuilder listFolderBuilder = client.files().listFolderBuilder(path == null ? "" : path);
 			result = listFolderBuilder.withRecursive(recursive).start();
 		} catch (Exception e) {
-			logger.error(MessageFormat.format("Error for sync files on path:{0} {1}", path, e.getMessage()), e);
+			logger.error(MessageFormat.format("Error for sync files on path:{0} {1}", path,e.getMessage()),e);
 		}
 		while (result != null) {
 
@@ -218,8 +204,11 @@ public class DropBoxServiceImpl implements DropBoxService {
 				logger.info("Couldn't get listFolderContinue");
 			}
 		}
-
-		return "";
+		//this shit will get me sorry one day
+		if (result == null) {
+			return "";
+		}
+		return result.getCursor();
 	}
 
 	/*

@@ -2,15 +2,15 @@ package com.dbl.service;
 
 import java.util.List;
 
-import com.dbl.domain.message.FileMessage;
+import com.dbl.domain.message.ChangeMessage;
 import com.dropbox.core.DbxApiException;
 import com.dropbox.core.DbxException;
 
 public interface LongPoolService {
 
-	void register(FileEventListener fileEventListener);
+	void register(ChangeEventListener changeEventListener);
 
-	List<FileEventListener> getEventListeners();
+	List<ChangeEventListener> getEventListeners();
 
 	/**
 	 * This method will call observers
@@ -18,7 +18,7 @@ public interface LongPoolService {
 	 * @param fileMessage
 	 * @return number of observers been called
 	 */
-	int updateListeners(FileMessage fileMessage);
+	int updateListeners(ChangeMessage fileMessage);
 
 	/**
 	 * This method will login to DropBox
