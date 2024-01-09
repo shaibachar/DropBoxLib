@@ -6,6 +6,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.*;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -48,6 +49,25 @@ public class DropBoxServiceImpl implements DropBoxService {
 		Config config = dropBoxUtils.getDefaultConfig(appProperties);
 		DbxAuthInfo auth = dropBoxUtils.getAuth(appProperties);
 		client = dropBoxUtils.createClient(auth, config, appProperties.getDropboxConfig());
+	}
+
+	@Override
+	public ListRevisionsResult getRevisions(String path) throws ListRevisionsErrorException, DbxException {
+		DbxUserFilesRequests files = client.files();
+		ListRevisionsResult listRevisions = files.listRevisions(path);
+		return listRevisions;
+	}
+
+	@Override
+	public Map<String, byte[]> downloadAllZip(String folderPath) throws DbxException, IOException {
+		Map<String, byte[]> res = new HashMap<>();
+		if (folderPath == null || folderPath.isEmpty()) {
+			return res;
+		}
+
+		Map<String, byte[]> stringMap = dropBoxUtils.downloadZip(folderPath, client);
+
+		return stringMap;
 	}
 
 	@Override
@@ -107,6 +127,24 @@ public class DropBoxServiceImpl implements DropBoxService {
 		} catch (Exception e) {
 			logger.error("Error on retrive all files", e);
 		}
+		return res;
+	}
+
+	@Override
+	public List<FileMetadata> allFiles(String folderPath, boolean recursive, List<String> fileTypes) {
+		List<FileMetadata> res = new ArrayList<>();
+		List<FileMetadata> allFiles = allFiles(folderPath, recursive);
+
+		for (FileMetadata fileMetadata : allFiles) {
+			String pathLower = fileMetadata.getPathLower();
+			for (String types : fileTypes) {
+				if(pathLower.contains(types)) {
+					res.add(fileMetadata);
+					break;
+				}
+			}
+		}
+
 		return res;
 	}
 
@@ -206,5 +244,27 @@ public class DropBoxServiceImpl implements DropBoxService {
 	public void setResult(ListFolderResult result) {
 		this.result = result;
 	}
+
+	@Override
+	public SearchResult search(String path, String query) throws SearchErrorException, DbxException {
+		SearchResult search = client.files().search(path, query);
+		return search;
+	}
+
+	@Override
+	public Boolean checkPath(String path) {
+		try {
+			Metadata metadata = client.files().getMetadata(path);
+			return metadata!=null;
+		} catch (DbxException e) {
+			return false;
+		}
+	}
+
+    @Override
+    public void delete(@NotNull String oldFileName) throws DbxException {
+        client.files().deleteV2(oldFileName);
+    }
+
 
 }

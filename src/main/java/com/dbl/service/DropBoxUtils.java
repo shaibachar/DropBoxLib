@@ -2,6 +2,7 @@ package com.dbl.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import com.dbl.config.DropBoxLibProperties;
 import com.dropbox.core.DbxAuthInfo;
@@ -39,7 +40,9 @@ public interface DropBoxUtils {
 
 	byte[] download(String filePath, DbxClientV2 client) throws DbxException, IOException;
 
-	FileMetadata upload(InputStream inputFile, String fullPath, DbxClientV2 client) throws DbxException, IOException;
+    Map<String, byte[]> downloadZip(String filePath, DbxClientV2 client) throws DbxException, IOException;
+
+    FileMetadata upload(InputStream inputFile, String fullPath, DbxClientV2 client) throws DbxException, IOException;
 
 	FileMetadata upload(InputStream inputFile, String fullPath, DbxClientV2 client, boolean override) throws DbxException, IOException;
 

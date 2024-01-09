@@ -1,31 +1,22 @@
 package com.dbl.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import com.dbl.domain.message.ChangeMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
 import com.dbl.config.DropBoxLibProperties;
 import com.dbl.domain.ChangeType;
+import com.dbl.domain.message.ChangeMessage;
 import com.dropbox.core.DbxApiException;
 import com.dropbox.core.DbxAuthInfo;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.http.StandardHttpRequestor.Config;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.DeletedMetadata;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.ListFolderGetLatestCursorResult;
-import com.dropbox.core.v2.files.ListFolderLongpollResult;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @EnableConfigurationProperties(DropBoxLibProperties.class)
 public class LongPoolServiceImpl implements LongPoolService {

@@ -10,6 +10,10 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.ListRevisionsErrorException;
+import com.dropbox.core.v2.files.ListRevisionsResult;
+import com.dropbox.core.v2.files.SearchErrorException;
+import com.dropbox.core.v2.files.SearchResult;
 
 public interface DropBoxService {
 
@@ -18,6 +22,8 @@ public interface DropBoxService {
 	 * This method will login to DropBox
 	 */
 	void connect();
+
+	Map<String, byte[]> downloadAllZip(String folderPath) throws DbxException, IOException;
 
 	/**
 	 * This method will download all files in dropBox folder 
@@ -91,4 +97,35 @@ public interface DropBoxService {
 	 */
 	FileMetadata upload(InputStream inputFile, String fullPath, boolean override) throws DbxException, IOException;
 
+	/**
+	 * This method will search drop box
+	 * @param path
+	 * @param query
+	 * @return
+	 * @throws DbxException 
+	 * @throws SearchErrorException 
+	 */
+	SearchResult search(String path, String query) throws SearchErrorException, DbxException;
+
+	/**
+	 * This method will retrieve all file revisions
+	 * @param path
+	 * @return
+	 * @throws ListRevisionsErrorException
+	 * @throws DbxException
+	 */
+	ListRevisionsResult getRevisions(String path) throws ListRevisionsErrorException, DbxException;
+
+	/**
+	 * This method will get all files of the file types
+	 * @param folderPath
+	 * @param b
+	 * @param fileTypes
+	 * @return
+	 */
+	List<FileMetadata> allFiles(String folderPath, boolean b, List<String> fileTypes);
+
+    Boolean checkPath(String path);
+
+    void delete(String oldFileName) throws DbxException;
 }
