@@ -6,7 +6,7 @@
 
     <groupId>dropboxlib</groupId>
     <artifactId>dropboxlib</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>dropboxlib</name>
@@ -21,7 +21,7 @@
 
     <properties>
 
-        <dropbox-core-sdk.version>5.4.5</dropbox-core-sdk.version>
+        <dropbox-core-sdk.version>7.0.0</dropbox-core-sdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
