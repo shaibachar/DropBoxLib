@@ -135,7 +135,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     @Override
-    public FileMetadata upload(InputStream inputFile, String fullPath) throws DbxException, IOException {
+    public FileMetadata upload(InputStream inputFile, String fullPath) throws DropBoxLibException {
         return upload(inputFile, fullPath, true);
     }
 
